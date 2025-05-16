@@ -1,0 +1,137 @@
+{{define "index"}}
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Burn after reading</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 3em auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #0001;
+            padding: 2em;
+        }
+
+        h2 {
+            /* text-align: center; */
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+        }
+
+        textarea,
+        input[type=password] {
+            width: 100%;
+            padding: 0.7em;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        input[type=submit] {
+            background: #0074d9;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.8em;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        input[type=submit]:hover {
+            background: #005fa3;
+        }
+
+        p {
+            color: #555;
+            text-align: center;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                margin: 1em;
+                padding: 1em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Burn after reading</h1>
+        {{.Content}}
+    </div>
+</body>
+
+</html>
+{{end}}
+
+{{define "create_form"}}
+<h2>Create new secret</h2>
+<form method="POST" action="/create">
+    <textarea name="message" rows="10" cols="50" required placeholder="Your secret message"></textarea><br>
+    <input type="password" name="password" required placeholder="Password" /><br>
+    <input type="submit" value="Create shareable link" />
+    <p><strong>Note:</strong> The message will be encrypted with <a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">AES-256</a> on the server, and will be deleted after it is revealed, or expire in 24 hours.</p>
+</form>
+{{end}}
+
+{{define "reveal_form"}}
+<h2>Reveal message</h2>
+<form method="POST" action="/reveal">
+    <input type="hidden" name="id" value="{{.ID}}" />
+    <input type="password" name="password" required placeholder="Password" /><br>
+    <input type="submit" value="Reveal" />
+</form>
+{{end}}
+
+{{define "reveal_success"}}
+<h2>Decrypted message</h2>
+<form>
+    <textarea rows="10" cols="50">{{.Message}}</textarea>
+</form>
+<p><strong>Note:</strong> The message has been deleted from the server.</p>
+{{end}}
+
+{{define "error"}}
+<h2>Error</h2>
+<p style='color:red'>{{.Error}}</p>
+<a href="/">Go back</a>
+{{end}}
+
+{{define "create_success"}}
+<h2>Success</h2>
+<p>Your secret link:</p>
+<div style="display: flex; gap: 0.5em; align-items: center; justify-content: center;">
+    <input id="secret-link" type="text" value="{{.FullURL}}" readonly style="width: 70%; font-size: 1em; padding: 0.3em;" />
+    <button type="button" onclick="copyLink()">Copy</button>
+</div>
+<p id="copy-msg" style="color: green; text-align: center; display: none;">Copied!</p>
+<p><strong>Note:</strong> The message will be deleted after it is revealed.</p>
+<script>
+function copyLink() {
+    var copyText = document.getElementById("secret-link");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // For mobile devices
+    document.execCommand("copy");
+    document.getElementById("copy-msg").style.display = "block";
+    setTimeout(function() { document.getElementById("copy-msg").style.display = "none"; }, 1500);
+}
+</script>
+{{end}}
